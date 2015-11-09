@@ -124,6 +124,7 @@
     <analyzeStacktraceFilter implementation="com.goide.runconfig.GoConsoleFilter"/>
     <lang.implementationTextSelectioner language="go" implementationClass="com.goide.editor.GoImplementationTextSelectioner"/>
     <lang.surroundDescriptor language="go" implementationClass="com.goide.editor.surround.GoSurroundDescriptor"/>
+    <iconProvider implementation="com.goide.GoIconProvider"/>
 
     <directoryProjectGenerator implementation="com.goide.GoProjectGenerator"/> <!-- for small IDEs-->
 
@@ -277,6 +278,10 @@
     </action>
     <action id="GoImportsFileAction" class="com.goide.actions.fmt.GoImportsFileAction" text="Goimports file"
             description="Optimizes imports for selected file with goimports util">
+      <add-to-group group-id="CodeMenu" anchor="last"/>
+    </action>
+      <action id="GoTypeFileAction" class="com.goide.actions.fmt.GoTypeFileAction" text="Gotype file"
+            description="Analyze types for selected file with gotype util">
       <add-to-group group-id="CodeMenu" anchor="last"/>
     </action>
   </actions>

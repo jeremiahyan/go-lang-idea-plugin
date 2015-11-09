@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package com.goide.debugger.ideagdb.debug.breakpoints;
+package com.goide;
 
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.xdebugger.breakpoints.XBreakpointProperties;
+import com.goide.psi.GoFile;
+import com.goide.runconfig.testing.GoTestFinder;
+import com.intellij.ide.IconProvider;
+import com.intellij.openapi.project.DumbAware;
+import com.intellij.openapi.util.Iconable;
+import com.intellij.psi.PsiElement;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class GdbBreakpointProperties extends XBreakpointProperties {
-  private static final Logger LOG = Logger.getInstance(GdbBreakpointProperties.class);
+import javax.swing.*;
 
+public class GoIconProvider extends IconProvider implements DumbAware {
   @Nullable
   @Override
-  public Object getState() {
-    LOG.warn("getState: stub");
-    return null;
-  }
-
-  @Override
-  public void loadState(Object state) {
-    LOG.warn("loadState: stub");
+  public Icon getIcon(@NotNull PsiElement e, @Iconable.IconFlags int flags) {
+    return e instanceof GoFile && e.isValid() && GoTestFinder.isTestFile((GoFile)e) ? GoIcons.TEST_RUN : null;
   }
 }

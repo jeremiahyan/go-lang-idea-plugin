@@ -45,10 +45,11 @@ public class GoDocumentationProvider extends AbstractDocumentationProvider {
       GoTopLevelDeclaration topLevel = PsiTreeUtil.getParentOfType(element, GoTopLevelDeclaration.class);
       Collection<PsiElement> children = PsiTreeUtil.findChildrenOfType(topLevel, element.getClass());
       boolean alone = children.size() == 1 && children.iterator().next().equals(element);
-      String result = getSignature(element);
-      List<PsiComment> comments = getPreviousNonWsComment(alone ? topLevel : element);
-      if (!comments.isEmpty()) result += getCommentText(comments);
-      return result;
+      String signature = getSignature(element);
+      String result = StringUtil.isNotEmpty(signature) ? "<b>" + signature + "</b>" : signature;
+      String commentText = getCommentText(getPreviousNonWsComment(alone ? topLevel : element));
+      String br = StringUtil.isNotEmpty(result) ? "<br/>" : "";
+      return StringUtil.isNotEmpty(commentText) ? result + br + commentText : result;
     }
     else if (element instanceof PsiDirectory) {
       String comments = getPackageComment(((PsiDirectory)element).findFile("doc.go"));
@@ -104,16 +105,14 @@ public class GoDocumentationProvider extends AbstractDocumentationProvider {
           text = StringUtil.trimStart(text, "/*");
           text = LEADING_TAB.matcher(text).replaceAll("");
         }
-        return "<p>" + XmlStringUtil.escapeString(text.trim()) + "</p>";
+        return XmlStringUtil.escapeString(text.trim());
       }
-    }), "\n");
+    }), "<br/>");
   }
 
   @NotNull
   private static String getSignature(PsiElement element) {
-    if (!(element instanceof GoSignatureOwner)) {
-      return "";
-    }
+    if (!(element instanceof GoSignatureOwner)) return "";
 
     PsiElement identifier = null;
     if (element instanceof GoNamedSignatureOwner) {
@@ -125,7 +124,7 @@ public class GoDocumentationProvider extends AbstractDocumentationProvider {
       return "";
     }
 
-    StringBuilder builder = new StringBuilder("<p><b>func ").append(identifier != null ? identifier.getText() : "").append('(');
+    StringBuilder builder = new StringBuilder("func ").append(identifier != null ? identifier.getText() : "").append('(');
     if (signature != null) {
       builder.append(getParametersAsString(signature.getParameters()));
     }
@@ -149,11 +148,21 @@ public class GoDocumentationProvider extends AbstractDocumentationProvider {
         builder.append(' ').append(XmlStringUtil.escapeString(type.getText()));
       }
     }
-    return builder.append("</b></p>\n").toString();
+    return builder.append("</b>").toString();
   }
 
   @NotNull
   private static String getParametersAsString(@NotNull GoParameters parameters) {
     return StringUtil.join(GoParameterInfoHandler.getParameterPresentations(parameters), ", ");
+  }
+
+  @Nullable
+  @Override
+  public String getQuickNavigateInfo(PsiElement element, PsiElement originalElement) {
+    if (element instanceof GoNamedElement) {
+      String result = getSignature(element);
+      if (StringUtil.isNotEmpty(result)) return result;
+    }
+    return super.getQuickNavigateInfo(element, originalElement);
   }
 }
